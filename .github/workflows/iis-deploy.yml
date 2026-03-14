@@ -16,12 +16,13 @@ steps:
     uses: actions/checkout@v3
 
   - name: Stop IIS Website
+    shell: powershell
     run: |
       Import-Module WebAdministration
       Stop-WebSite -Name "Default Web Site"
-    shell: powershell
 
-  - name: Deploy Website Files
+  - name: Copy Website Files
+    shell: powershell
     run: |
       $source = "${{ github.workspace }}"
       $destination = "C:\inetpub\wwwroot"
@@ -29,17 +30,16 @@ steps:
       robocopy $source $destination /MIR /R:2 /W:2 /XD .git .github
 
       if ($LASTEXITCODE -le 3) {
-        Write-Host "Deployment completed successfully"
+        Write-Host "Deployment successful"
         exit 0
       } else {
-        Write-Host "Deployment failed with exit code $LASTEXITCODE"
+        Write-Host "Deployment failed"
         exit $LASTEXITCODE
       }
-    shell: powershell
 
   - name: Start IIS Website
+    shell: powershell
     run: |
       Import-Module WebAdministration
       Start-WebSite -Name "Default Web Site"
-    shell: powershell
 ```
