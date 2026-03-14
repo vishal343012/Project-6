@@ -11,7 +11,6 @@ runs-on: self-hosted
 
 ```
 steps:
-
   - name: Checkout Repository
     uses: actions/checkout@v3
 
@@ -22,15 +21,8 @@ steps:
       Stop-WebSite -Name "Default Web Site"
 
   - name: Copy Website Files
-    shell: powershell
-    run: |
-      $source = "${{ github.workspace }}"
-      $destination = "C:\inetpub\wwwroot"
-
-      robocopy $source $destination /MIR /XD ".git" ".github"
-
-      Write-Host "Robocopy completed"
-      exit 0
+    run: robocopy . "C:\inetpub\wwwroot" /MIR /XD ".git" ".github"
+    continue-on-error: true
 
   - name: Start IIS Website
     shell: powershell
