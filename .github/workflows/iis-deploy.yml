@@ -1,33 +1,45 @@
-name: Deploy Static Website to IiS
+name: Deploy Static Website to IIS
 
 on:
-  push:
-    branches:
-      - main
+push:
+branches:
+- main
 
 jobs:
+deploy:
+runs-on: self-hosted
 
-  deploy:
-    runs-on: self-hosted
+```
+steps:
 
-    steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v3
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+  - name: Stop IIS Website
+    run: |
+      Import-Module WebAdministration
+      Stop-WebSite -Name "Default Web Site"
+    shell: powershell
 
-      - name: Stop IIS Website
-        run: |
-          Import-Module WebAdministration
-          Stop-WebSite -Name "Default Web Site"
-        shell: powershell
+  - name: Deploy Website Files
+    run: |
+      $source = "${{ github.workspace }}"
+      $destination = "C:\inetpub\wwwroot"
 
-      - name: Copy Website Files
-        run: |
-          robocopy . "C:\inetpub\wwwroot" /MIR
-        shell: cmd
+      robocopy $source $destination /MIR /R:2 /W:2 /XD .git .github
 
-      - name: Start IIS Website
-        run: |
-          Import-Module WebAdministration
-          Start-WebSite -Name "Default Web Site"
-        shell: powershell
+      if ($LASTEXITCODE -le 3) {
+        Write-Host "Deployment completed successfully"
+        exit 0
+      } else {
+        Write-Host "Deployment failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+      }
+    shell: powershell
+
+  - name: Start IIS Website
+    run: |
+      Import-Module WebAdministration
+      Start-WebSite -Name "Default Web Site"
+    shell: powershell
+```
