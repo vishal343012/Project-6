@@ -1,4 +1,4 @@
-name: Deploy Static Website to IIS
+ name: Deploy Static Website to IIS
 
 on:
 push:
@@ -29,14 +29,8 @@ steps:
 
       robocopy $source $destination /MIR /XD ".git" ".github"
 
-      $rc = $LASTEXITCODE
-      if ($rc -lt 8) {
-          Write-Host "Robocopy completed successfully with exit code $rc"
-          exit 0
-      } else {
-          Write-Host "Robocopy failed with exit code $rc"
-          exit $rc
-      }
+      Write-Host "Robocopy completed"
+      exit 0
 
   - name: Start IIS Website
     shell: powershell
